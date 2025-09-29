@@ -9,9 +9,18 @@
 </head>
 <body>
     <div class="container">
-        <header class="text-center" style="padding: var(--space-16) 0;">
+        <header class="text-center" style="padding: var(--space-16) 0; position: relative;">
+            <!-- Theme Toggle Button -->
+            <button id="theme-toggle" 
+                    class="btn btn-secondary" 
+                    aria-label="Alternar para modo escuro"
+                    style="position: absolute; top: var(--space-4); right: var(--space-4); display: flex; align-items: center; gap: var(--space-2);">
+                <span class="theme-icon" aria-hidden="true">🌙</span>
+                <span>Tema</span>
+            </button>
+            
             <h1 class="animate-fade-in">Dark-Mode-Design-System</h1>
-            <p class="text-secondary animate-fade-in">Professional DarkModeDesign Design System</p>
+            <p class="text-secondary animate-fade-in">Professional DarkMode Design System</p>
         </header>
         
         <main class="grid grid-cols-1 gap-8">
@@ -48,5 +57,8 @@
             <p class="text-secondary">Built with professional CSS by Gabriel Demetrios Lafis</p>
         </footer>
     </div>
+    
+    <!-- Theme Controller Script -->
+    <script src="script.js"></script>
 </body>
 </html>
