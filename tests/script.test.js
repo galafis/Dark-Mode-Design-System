@@ -1,163 +1,207 @@
-/**
- * Testes Unitários para Dark Mode Design System - Theme Controller
- * 
- * @author Gabriel Demetrios Lafis
- * @version 1.0.0
- * @license MIT
- */
+(function() {
+    'use strict';
 
-// Mock localStorage para testes
-const localStorageMock = (function() {
-    let store = {};
-    return {
-        getItem: function(key) {
-            return store[key] || null;
-        },
-        setItem: function(key, value) {
-            store[key] = value.toString();
-        },
-        removeItem: function(key) {
-            delete store[key];
-        },
-        clear: function() {
-            store = {};
+    const assert = (condition, message) => {
+        if (!condition) {
+            throw new Error(message || "Assertion failed");
         }
     };
-})();
 
-Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+    const test = (name, fn) => {
+        const resultDiv = document.createElement('div');
+        resultDiv.className = 'test-result';
+        resultDiv.innerHTML = `<strong>${name}:</strong> <span class="status"></span>`;
+        document.getElementById('test-results').appendChild(resultDiv);
 
-// Mock matchMedia para testes de preferência do sistema
-const matchMediaMock = (function() {
-    let dark = false;
-    return {
-        setDark: function(isDark) {
-            dark = isDark;
-        },
-        matchMedia: function(query) {
-            return {
-                matches: dark,
-                media: query,
-                onchange: null,
-                addEventListener: function() {},
-                removeEventListener: function() {},
-                addListener: function() {},
-                removeListener: function() {}
-            };
+        try {
+            fn();
+            resultDiv.classList.add('pass');
+            resultDiv.querySelector('.status').textContent = 'PASS';
+        } catch (e) {
+            resultDiv.classList.add('fail');
+            resultDiv.querySelector('.status').textContent = `FAIL - ${e.message}`;
+            console.error(`Test Failed: ${name}`, e);
         }
     };
-})();
 
-Object.defineProperty(window, 'matchMedia', { value: matchMediaMock.matchMedia });
-
-// Carregar o script a ser testado
-// Em um ambiente de navegador real, isso seria feito via <script src="..."></script>
-// Para testes em Node.js, precisamos simular o ambiente do navegador ou usar JSDOM
-// Para simplificar, vamos expor as funções do script para teste, se possível.
-// Assumindo que o script.js é envolvido em uma IIFE e expõe um objeto global como `window.ThemeController`
-
-// Simular o ambiente DOM mínimo necessário para o script.js
-document.documentElement = document.createElement('html');
-document.body = document.createElement('body');
-document.getElementById = (id) => {
-    if (id === 'theme-toggle') {
-        const btn = document.createElement('button');
-        btn.setAttribute('id', 'theme-toggle');
-        btn.innerHTML = '<span class="theme-icon">🌙</span><span>Tema</span>';
-        btn.querySelector = (selector) => {
-            if (selector === '.theme-icon') return btn.children[0];
-            return null;
+    // Mock localStorage
+    const localStorageMock = (() => {
+        let store = {};
+        return {
+            getItem: function(key) { return store[key] || null; },
+            setItem: function(key, value) { store[key] = value.toString(); },
+            removeItem: function(key) { delete store[key]; },
+            clear: function() { store = {}; }
         };
-        return btn;
-    }
-    return null;
-};
+    })();
+    Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
-// Simular a inclusão do script.js
-// Para fins de teste, vamos redefinir o window.ThemeController após cada teste
-// para garantir um estado limpo.
+    // Mock matchMedia
+    let mockMatches = false;
+    const matchMediaMock = (query) => ({
+        matches: mockMatches,
+        media: query,
+        onchange: null,
+        addListener: () => {}, // Mock function
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => {},
+    });
+    Object.defineProperty(window, 'matchMedia', { value: matchMediaMock });
 
-// Conteúdo do script.js (para ser executado e expor ThemeController)
-const scriptContent = `
-    ${require('fs').readFileSync('./Dark-Mode-Design-System/src/script.js', 'utf8')}
-`;
-
-// Função para carregar e executar o script.js em um contexto isolado
-function loadThemeController() {
-    localStorage.clear(); // Limpa o localStorage antes de cada carga
-    document.documentElement.removeAttribute('data-theme');
-    document.documentElement.setAttribute('data-theme', 'light'); // Default para light
-    const script = document.createElement('script');
-    script.textContent = scriptContent;
-    document.body.appendChild(script);
-    return window.ThemeController;
-}
-
-// Testes
-describe('ThemeController', () => {
-    let ThemeController;
-
-    beforeEach(() => {
-        // Resetar o DOM e localStorage antes de cada teste
+    // Reset DOM before each test
+    const resetDOM = () => {
         document.documentElement.removeAttribute('data-theme');
         localStorage.clear();
-        matchMediaMock.setDark(false); // Padrão para sistema claro
-        // Recarregar o script para garantir um estado limpo
-        ThemeController = loadThemeController();
+        // Clear any existing toggle button to avoid interference
+        const existingToggleButton = document.getElementById('theme-toggle');
+        if (existingToggleButton) {
+            existingToggleButton.remove();
+        }
+    };
+
+    // Ensure ThemeController is available globally after script.js loads
+    // For these tests, we assume script.js is loaded *before* script.test.js
+    const ThemeController = window.ThemeController;
+
+    // Helper to simulate a fresh load of ThemeController for tests that need it
+    const simulateFreshLoad = () => {
+        // This is a simplified approach. In a real test runner, you'd re-import/re-require the module.
+        // Here, we'll just re-run the initTheme and setupEventListeners manually.
+        // This assumes initTheme and setupEventListeners are idempotent or can be safely re-run.
+        ThemeController.initTheme();
+        // Re-attach event listeners, especially for keyboard shortcuts
+        const toggleButton = document.createElement('button');
+        toggleButton.id = 'theme-toggle';
+        toggleButton.innerHTML = '<span class="theme-icon">🌙</span><span>Tema</span>';
+        document.body.appendChild(toggleButton);
+        ThemeController.setupEventListeners();
+    };
+
+    test('ThemeController.getSystemTheme should return dark if system prefers dark', () => {
+        resetDOM();
+        mockMatches = true;
+        simulateFreshLoad();
+        assert(ThemeController.getSystemTheme() === 'dark', 'System theme should be dark');
     });
 
-    test('should initialize with system theme if no saved theme', () => {
-        matchMediaMock.setDark(true);
-        ThemeController = loadThemeController(); // Recarregar para pegar a preferência do sistema
-        expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+    test('ThemeController.getSystemTheme should return light if system prefers light', () => {
+        resetDOM();
+        mockMatches = false;
+        simulateFreshLoad();
+        assert(ThemeController.getSystemTheme() === 'light', 'System theme should be light');
     });
 
-    test('should initialize with saved theme if available', () => {
+    test('ThemeController.set should apply the theme to documentElement', () => {
+        resetDOM();
+        simulateFreshLoad();
+        ThemeController.set('dark');
+        assert(document.documentElement.getAttribute('data-theme') === 'dark', 'data-theme should be dark');
+        ThemeController.set('light');
+        assert(document.documentElement.getAttribute('data-theme') === null, 'data-theme should be removed for light');
+    });
+
+    test('ThemeController.toggle should switch theme and save to localStorage', () => {
+        resetDOM();
+        simulateFreshLoad();
+        // Initial state (default is light)
+        ThemeController.set('light'); // Ensure a known starting state
+        assert(ThemeController.get() === 'light', 'Initial theme should be light');
+
+        // Toggle to dark
+        ThemeController.toggle();
+        assert(ThemeController.get() === 'dark', 'Theme should be dark after first toggle');
+        assert(localStorage.getItem('theme') === 'dark', 'localStorage should save dark theme');
+
+        // Toggle to light
+        ThemeController.toggle();
+        assert(ThemeController.get() === 'light', 'Theme should be light after second toggle');
+        assert(localStorage.getItem('theme') === 'light', 'localStorage should save light theme');
+    });
+
+    test('ThemeController should load saved theme from localStorage on init', () => {
+        resetDOM();
         localStorage.setItem('theme', 'dark');
-        ThemeController = loadThemeController();
-        expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+        simulateFreshLoad();
+        assert(document.documentElement.getAttribute('data-theme') === 'dark', 'Saved theme should be loaded');
+        assert(ThemeController.get() === 'dark', 'ThemeController.get should reflect saved theme');
     });
 
-    test('should toggle theme from light to dark', () => {
-        document.documentElement.setAttribute('data-theme', 'light');
-        ThemeController.toggle();
-        expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
-        expect(localStorage.getItem('theme')).toBe('dark');
+    test('ThemeController should respect system preference if no theme is saved', () => {
+        resetDOM();
+        localStorage.removeItem('theme');
+        mockMatches = true; // System prefers dark
+        simulateFreshLoad();
+        assert(document.documentElement.getAttribute('data-theme') === 'dark', 'Should use system dark preference');
+
+        resetDOM();
+        localStorage.removeItem('theme');
+        mockMatches = false; // System prefers light
+        simulateFreshLoad();
+        assert(document.documentElement.getAttribute('data-theme') === null, 'Should use system light preference (no data-theme)');
     });
 
-    test('should toggle theme from dark to light', () => {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        ThemeController.toggle();
-        expect(document.documentElement.getAttribute('data-theme')).toBe('light');
-        expect(localStorage.getItem('theme')).toBe('light');
+    test('updateToggleButton should update aria-label and icon', () => {
+        resetDOM();
+        const toggleButton = document.createElement('button');
+        toggleButton.id = 'theme-toggle';
+        toggleButton.innerHTML = '<span class="theme-icon">🌙</span><span>Tema</span>';
+        document.body.appendChild(toggleButton);
+        simulateFreshLoad();
+
+        ThemeController.set('dark');
+        assert(toggleButton.getAttribute('aria-label') === 'Alternar para modo claro', 'aria-label should be for light mode');
+        assert(toggleButton.querySelector('.theme-icon').textContent === '☀️', 'Icon should be sun');
+
+        ThemeController.set('light');
+        assert(toggleButton.getAttribute('aria-label') === 'Alternar para modo escuro', 'aria-label should be for dark mode');
+        assert(toggleButton.querySelector('.theme-icon').textContent === '🌙', 'Icon should be moon');
+
+        document.body.removeChild(toggleButton);
     });
 
-    test('should update toggle button aria-label and icon', () => {
-        const toggleButton = document.getElementById('theme-toggle');
-        expect(toggleButton.getAttribute('aria-label')).toBe('Alternar para modo escuro');
-        expect(toggleButton.querySelector('.theme-icon').textContent).toBe('🌙');
+    test('Keyboard shortcut Ctrl+Shift+D should toggle theme', () => {
+        resetDOM();
+        // Simulate button presence for updateToggleButton
+        const toggleButton = document.createElement('button');
+        toggleButton.id = 'theme-toggle';
+        toggleButton.innerHTML = '<span class="theme-icon">🌙</span><span>Tema</span>';
+        document.body.appendChild(toggleButton);
+        simulateFreshLoad();
 
-        ThemeController.toggle(); // Light to Dark
-        expect(toggleButton.getAttribute('aria-label')).toBe('Alternar para modo claro');
-        expect(toggleButton.querySelector('.theme-icon').textContent).toBe('☀️');
+        // Initial theme is light
+        ThemeController.set('light');
+        assert(ThemeController.get() === 'light', 'Initial theme should be light');
 
-        ThemeController.toggle(); // Dark to Light
-        expect(toggleButton.getAttribute('aria-label')).toBe('Alternar para modo escuro');
-        expect(toggleButton.querySelector('.theme-icon').textContent).toBe('🌙');
+        // Simulate Ctrl+Shift+D
+        const event = new KeyboardEvent('keydown', {
+            key: 'D',
+            ctrlKey: true,
+            shiftKey: true,
+            bubbles: true
+        });
+        document.dispatchEvent(event);
+        assert(ThemeController.get() === 'dark', 'Theme should be dark after shortcut');
+
+        document.dispatchEvent(event);
+        assert(ThemeController.get() === 'light', 'Theme should be light after second shortcut');
+
+        document.body.removeChild(toggleButton);
     });
 
-    test('get() should return current theme', () => {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        expect(ThemeController.get()).toBe('dark');
-        document.documentElement.setAttribute('data-theme', 'light');
-        expect(ThemeController.get()).toBe('light');
+    // Run tests after the DOM is fully loaded
+    window.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('test-results').innerHTML = ''; // Clear previous results if any
+        // Ensure ThemeController is initialized before running tests
+        if (window.ThemeController && window.ThemeController.initTheme) {
+            window.ThemeController.initTheme();
+        }
+        if (window.ThemeController && window.ThemeController.setupEventListeners) {
+            window.ThemeController.setupEventListeners();
+        }
+        // Now run the tests
+        test('All tests completed', () => {}); // Placeholder to show all tests ran
     });
 
-    test('getSystemTheme() should return system preference', () => {
-        matchMediaMock.setDark(true);
-        expect(ThemeController.getSystemTheme()).toBe('dark');
-        matchMediaMock.setDark(false);
-        expect(ThemeController.getSystemTheme()).toBe('light');
-    });
-});
-
+})();

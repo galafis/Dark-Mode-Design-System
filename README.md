@@ -4,6 +4,7 @@
 ![HTML](https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live%20Demo-brightgreen)
 
 Um sistema de design completo e profissional com suporte a modo escuro, alternância de temas e conformidade com diretrizes de acessibilidade. Este projeto implementa as melhores práticas para interfaces modernas, garantindo uma experiência de usuário otimizada e responsiva, com foco em performance e manutenibilidade. A autoria de todo o trabalho é de Gabriel Demetrios Lafis.
 
@@ -18,6 +19,8 @@ Este projeto oferece um sistema de design robusto que suporta automaticamente mo
 ---
 
 This project offers a robust design system that automatically supports light and dark modes, respecting the user's operating system preferences. Additionally, it allows manual theme switching and persists the user's choice.
+
+**Acesse a demonstração ao vivo:** [GitHub Pages](https://galafis.github.io/Dark-Mode-Design-System/src/index.html)
 
 ## ✨ Características / Features
 
@@ -44,10 +47,17 @@ Dark-Mode-Design-System/
 │   ├── styles.css      # Sistema de temas e componentes
 │   └── script.js       # Lógica de alternância de temas
 ├── tests/              # Testes unitários e de integração
+│   ├── index.html      # Página para execução dos testes
+│   └── script.test.js  # Arquivo de testes unitários para script.js
 ├── docs/               # Documentação adicional e diagramas
+│   ├── architecture.png # Diagrama de arquitetura do sistema
+│   └── hero-image.txt   # Placeholder para imagem hero
 ├── config/             # Arquivos de configuração (LICENSE, CONTRIBUTING.md)
 │   ├── LICENSE         # Licença MIT
 │   └── CONTRIBUTING.md # Diretrizes para contribuição
+├── .github/            # Configurações do GitHub
+│   └── workflows/      # Workflows de GitHub Actions
+│       └── github-pages.yml # Workflow para deploy no GitHub Pages
 ├── .gitignore          # Arquivos ignorados pelo Git
 └── README.md           # Documentação principal do projeto
 ```
@@ -97,7 +107,7 @@ The system uses CSS variables to manage colors and other design tokens, making c
     --border-color: #dee2e6;
 }
 
-[data-theme="dark"] {
+html[data-theme="dark"] {
     /* Tema Escuro / Dark Theme */
     --bg-primary: #1a1a1a;
     --bg-secondary: #2d2d2d;
@@ -117,7 +127,7 @@ CSS automatically detects the user's operating system theme preference via media
 
 ```css
 @media (prefers-color-scheme: dark) {
-    :root {
+    html:not([data-theme]) {
         --bg-primary: #1a1a1a;
         --bg-secondary: #2d2d2d;
         --text-primary: #ffffff;
@@ -275,5 +285,13 @@ Uma representação visual do sistema de design em ação, destacando a estétic
 
 A visual representation of the design system in action, highlighting the aesthetics and functionality of dark mode.
 
-![Imagem Hero](docs/hero-image.png)
+![Imagem Hero](docs/hero-image.txt)
+
+## ✅ Testes Unitários / Unit Tests
+
+Para executar os testes unitários do `script.js`, abra o arquivo `tests/index.html` em seu navegador.
+
+---
+
+To run the unit tests for `script.js`, open the `tests/index.html` file in your browser.
 
