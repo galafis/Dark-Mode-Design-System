@@ -285,7 +285,8 @@ Uma representação visual do sistema de design em ação, destacando a estétic
 
 A visual representation of the design system in action, highlighting the aesthetics and functionality of dark mode.
 
-![Imagem Hero](docs/hero-image.txt)
+![Imagem Hero](docs/hero-image.png)
+
 
 ## ✅ Testes Unitários / Unit Tests
 
