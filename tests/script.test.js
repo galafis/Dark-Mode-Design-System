@@ -1,3 +1,5 @@
+import { initThemeController, setTheme, updateToggleButton } from '../src/script.js';
+
 (function() {
     'use strict';
 
@@ -37,171 +39,129 @@
     Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
     // Mock matchMedia
-    let mockMatches = false;
-    const matchMediaMock = (query) => ({
-        matches: mockMatches,
+    let mockPrefersDark = false;
+    let matchMediaListeners = [];
+    const createMatchMediaMock = (query) => ({
+        matches: mockPrefersDark,
         media: query,
         onchange: null,
-        addListener: () => {}, // Mock function
-        removeListener: () => {},
-        addEventListener: () => {},
-        removeEventListener: () => {},
+        addListener: (handler) => matchMediaListeners.push(handler), // Deprecated, but for compatibility
+        removeListener: (handler) => matchMediaListeners = matchMediaListeners.filter(h => h !== handler),
+        addEventListener: (event, handler) => { if (event === 'change') matchMediaListeners.push(handler); },
+        removeEventListener: (event, handler) => { if (event === 'change') matchMediaListeners = matchMediaListeners.filter(h => h !== handler); },
         dispatchEvent: () => {},
     });
-    Object.defineProperty(window, 'matchMedia', { value: matchMediaMock });
+    Object.defineProperty(window, 'matchMedia', { value: createMatchMediaMock });
 
-    // Reset DOM before each test
-    const resetDOM = () => {
+    // Helper to trigger matchMedia change event
+    const triggerMatchMediaChange = (prefersDark) => {
+        mockPrefersDark = prefersDark;
+        const event = { matches: prefersDark };
+        matchMediaListeners.forEach(handler => handler(event));
+    };
+
+    // Reset DOM and localStorage before each test
+    const resetState = () => {
         document.documentElement.removeAttribute('data-theme');
         localStorage.clear();
-        // Clear any existing toggle button to avoid interference
-        const existingToggleButton = document.getElementById('theme-toggle');
-        if (existingToggleButton) {
-            existingToggleButton.remove();
+        matchMediaListeners = []; // Clear listeners
+
+        // Ensure the theme-toggle button exists for tests
+        let toggleButton = document.getElementById('theme-toggle');
+        if (toggleButton) {
+            toggleButton.remove(); // Remove existing button to ensure a clean state
         }
-    };
-
-    // Ensure ThemeController is available globally after script.js loads
-    // For these tests, we assume script.js is loaded *before* script.test.js
-    const ThemeController = window.ThemeController;
-
-    // Helper to simulate a fresh load of ThemeController for tests that need it
-    const simulateFreshLoad = () => {
-        // This is a simplified approach. In a real test runner, you'd re-import/re-require the module.
-        // Here, we'll just re-run the initTheme and setupEventListeners manually.
-        // This assumes initTheme and setupEventListeners are idempotent or can be safely re-run.
-        ThemeController.initTheme();
-        // Re-attach event listeners, especially for keyboard shortcuts
-        const toggleButton = document.createElement('button');
+        toggleButton = document.createElement('button');
         toggleButton.id = 'theme-toggle';
         toggleButton.innerHTML = '<span class="theme-icon">🌙</span><span>Tema</span>';
         document.body.appendChild(toggleButton);
-        ThemeController.setupEventListeners();
     };
 
-    test('ThemeController.getSystemTheme should return dark if system prefers dark', () => {
-        resetDOM();
-        mockMatches = true;
-        simulateFreshLoad();
-        assert(ThemeController.getSystemTheme() === 'dark', 'System theme should be dark');
+    // Test 1: Initial theme should be light if no preference and system prefers light
+    test('Initial theme: system light, no stored preference', () => {
+        resetState();
+        mockPrefersDark = false; // System prefers light
+        initThemeController();
+        assert(document.documentElement.getAttribute('data-theme') === 'light', 'Initial theme should be light');
+        assert(localStorage.getItem('theme') === null, 'Light theme should NOT be saved to localStorage if from system preference');
+        assert(document.getElementById('theme-toggle').querySelector('.theme-icon').textContent === '🌙', 'Icon should be moon');
     });
 
-    test('ThemeController.getSystemTheme should return light if system prefers light', () => {
-        resetDOM();
-        mockMatches = false;
-        simulateFreshLoad();
-        assert(ThemeController.getSystemTheme() === 'light', 'System theme should be light');
+    // Test 2: Initial theme should be dark if no preference and system prefers dark
+    test('Initial theme: system dark, no stored preference', () => {
+        resetState();
+        mockPrefersDark = true; // System prefers dark
+        initThemeController();
+        assert(document.documentElement.getAttribute('data-theme') === 'dark', 'Initial theme should be dark');
+        assert(localStorage.getItem('theme') === null, 'Dark theme should NOT be saved to localStorage if from system preference');
+        assert(document.getElementById('theme-toggle').querySelector('.theme-icon').textContent === '☀️', 'Icon should be sun');
     });
 
-    test('ThemeController.set should apply the theme to documentElement', () => {
-        resetDOM();
-        simulateFreshLoad();
-        ThemeController.set('dark');
-        assert(document.documentElement.getAttribute('data-theme') === 'dark', 'data-theme should be dark');
-        ThemeController.set('light');
-        assert(document.documentElement.getAttribute('data-theme') === null, 'data-theme should be removed for light');
-    });
-
-    test('ThemeController.toggle should switch theme and save to localStorage', () => {
-        resetDOM();
-        simulateFreshLoad();
-        // Initial state (default is light)
-        ThemeController.set('light'); // Ensure a known starting state
-        assert(ThemeController.get() === 'light', 'Initial theme should be light');
-
-        // Toggle to dark
-        ThemeController.toggle();
-        assert(ThemeController.get() === 'dark', 'Theme should be dark after first toggle');
-        assert(localStorage.getItem('theme') === 'dark', 'localStorage should save dark theme');
-
-        // Toggle to light
-        ThemeController.toggle();
-        assert(ThemeController.get() === 'light', 'Theme should be light after second toggle');
-        assert(localStorage.getItem('theme') === 'light', 'localStorage should save light theme');
-    });
-
-    test('ThemeController should load saved theme from localStorage on init', () => {
-        resetDOM();
+    // Test 3: Theme should load from localStorage if present
+    test('Theme loads from localStorage', () => {
+        resetState();
         localStorage.setItem('theme', 'dark');
-        simulateFreshLoad();
-        assert(document.documentElement.getAttribute('data-theme') === 'dark', 'Saved theme should be loaded');
-        assert(ThemeController.get() === 'dark', 'ThemeController.get should reflect saved theme');
+        mockPrefersDark = false; // System prefers light, but localStorage should override
+        initThemeController();
+        assert(document.documentElement.getAttribute('data-theme') === 'dark', 'Theme from localStorage should be loaded');
+        assert(localStorage.getItem('theme') === 'dark', 'Stored theme should remain in localStorage');
+        assert(document.getElementById('theme-toggle').querySelector('.theme-icon').textContent === '☀️', 'Icon should be sun');
     });
 
-    test('ThemeController should respect system preference if no theme is saved', () => {
-        resetDOM();
-        localStorage.removeItem('theme');
-        mockMatches = true; // System prefers dark
-        simulateFreshLoad();
-        assert(document.documentElement.getAttribute('data-theme') === 'dark', 'Should use system dark preference');
+    // Test 4: Theme toggle button should switch theme from light to dark
+    test('Toggle from light to dark', () => {
+        resetState();
+        localStorage.setItem('theme', 'light'); // Start with light theme
+        initThemeController(); 
 
-        resetDOM();
-        localStorage.removeItem('theme');
-        mockMatches = false; // System prefers light
-        simulateFreshLoad();
-        assert(document.documentElement.getAttribute('data-theme') === null, 'Should use system light preference (no data-theme)');
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.click(); // Toggle to dark
+        assert(document.documentElement.getAttribute('data-theme') === 'dark', 'Theme should be dark after first click');
+        assert(localStorage.getItem('theme') === 'dark', 'localStorage should be dark after first click');
+        assert(themeToggle.querySelector('.theme-icon').textContent === '☀️', 'Icon should be sun');
+        assert(themeToggle.getAttribute('aria-label') === 'Alternar para modo claro', 'aria-label should be for light mode');
     });
 
-    test('updateToggleButton should update aria-label and icon', () => {
-        resetDOM();
-        const toggleButton = document.createElement('button');
-        toggleButton.id = 'theme-toggle';
-        toggleButton.innerHTML = '<span class="theme-icon">🌙</span><span>Tema</span>';
-        document.body.appendChild(toggleButton);
-        simulateFreshLoad();
+    // Test 5: Theme toggle button should switch theme from dark to light
+    test('Toggle from dark to light', () => {
+        resetState();
+        localStorage.setItem('theme', 'dark'); // Start with dark theme
+        initThemeController(); 
 
-        ThemeController.set('dark');
-        assert(toggleButton.getAttribute('aria-label') === 'Alternar para modo claro', 'aria-label should be for light mode');
-        assert(toggleButton.querySelector('.theme-icon').textContent === '☀️', 'Icon should be sun');
-
-        ThemeController.set('light');
-        assert(toggleButton.getAttribute('aria-label') === 'Alternar para modo escuro', 'aria-label should be for dark mode');
-        assert(toggleButton.querySelector('.theme-icon').textContent === '🌙', 'Icon should be moon');
-
-        document.body.removeChild(toggleButton);
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.click(); // Toggle to light
+        assert(document.documentElement.getAttribute('data-theme') === 'light', 'Theme should be light after second click');
+        assert(localStorage.getItem('theme') === 'light', 'localStorage should be light after second click');
+        assert(themeToggle.querySelector('.theme-icon').textContent === '🌙', 'Icon should be moon');
+        assert(themeToggle.getAttribute('aria-label') === 'Alternar para modo escuro', 'aria-label should be for dark mode');
     });
 
-    test('Keyboard shortcut Ctrl+Shift+D should toggle theme', () => {
-        resetDOM();
-        // Simulate button presence for updateToggleButton
-        const toggleButton = document.createElement('button');
-        toggleButton.id = 'theme-toggle';
-        toggleButton.innerHTML = '<span class="theme-icon">🌙</span><span>Tema</span>';
-        document.body.appendChild(toggleButton);
-        simulateFreshLoad();
+    // Test 6: System preference change should update theme if no stored preference
+    test('System preference change (no stored preference)', () => {
+        resetState();
+        localStorage.removeItem('theme'); // Ensure no stored preference
+        mockPrefersDark = false; // Initial system preference light
+        initThemeController(); 
+        assert(document.documentElement.getAttribute('data-theme') === 'light', 'Initial theme should be light based on system');
+        assert(localStorage.getItem('theme') === null, 'localStorage should be null initially');
 
-        // Initial theme is light
-        ThemeController.set('light');
-        assert(ThemeController.get() === 'light', 'Initial theme should be light');
-
-        // Simulate Ctrl+Shift+D
-        const event = new KeyboardEvent('keydown', {
-            key: 'D',
-            ctrlKey: true,
-            shiftKey: true,
-            bubbles: true
-        });
-        document.dispatchEvent(event);
-        assert(ThemeController.get() === 'dark', 'Theme should be dark after shortcut');
-
-        document.dispatchEvent(event);
-        assert(ThemeController.get() === 'light', 'Theme should be light after second shortcut');
-
-        document.body.removeChild(toggleButton);
+        // Simulate system preference changing to dark
+        triggerMatchMediaChange(true);
+        assert(document.documentElement.getAttribute('data-theme') === 'dark', 'Theme should switch to dark after system preference change');
+        assert(localStorage.getItem('theme') === null, 'localStorage should still be null after system change');
     });
 
-    // Run tests after the DOM is fully loaded
-    window.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('test-results').innerHTML = ''; // Clear previous results if any
-        // Ensure ThemeController is initialized before running tests
-        if (window.ThemeController && window.ThemeController.initTheme) {
-            window.ThemeController.initTheme();
-        }
-        if (window.ThemeController && window.ThemeController.setupEventListeners) {
-            window.ThemeController.setupEventListeners();
-        }
-        // Now run the tests
-        test('All tests completed', () => {}); // Placeholder to show all tests ran
-    });
+    // Test 7: System preference change should NOT update theme if stored preference exists
+    test('System preference change (with stored preference)', () => {
+        resetState();
+        localStorage.setItem('theme', 'light'); // Stored preference exists
+        mockPrefersDark = true; // System prefers dark, but stored preference should override
+        initThemeController(); 
+        assert(document.documentElement.getAttribute('data-theme') === 'light', 'Theme should remain light due to stored preference');
 
+        // Simulate system preference changing to dark, but stored preference should still override
+        triggerMatchMediaChange(true);
+        assert(document.documentElement.getAttribute('data-theme') === 'light', 'Theme should still be light, ignoring system preference');
+        assert(localStorage.getItem('theme') === 'light', 'localStorage should remain light');
+    });
 })();

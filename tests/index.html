@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit Tests for Dark-Mode-Design-System</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
+        h1 { color: #0056b3; }
+        #test-results { margin-top: 20px; border-top: 1px solid #ccc; padding-top: 10px; }
+        .test-result { padding: 8px 0; border-bottom: 1px dotted #eee; }
+        .test-result:last-child { border-bottom: none; }
+        .test-result.pass { color: #28a745; }
+        .test-result.fail { color: #dc3545; font-weight: bold; }
+        .test-result .status { margin-left: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Dark-Mode-Design-System Unit Tests</h1>
+    <div id="test-results"></div>
+
+    <script type="module" src="../src/script.js"></script>
+    <script type="module" src="./script.test.js"></script>
+</body>
+</html>

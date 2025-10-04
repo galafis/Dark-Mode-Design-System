@@ -51,7 +51,7 @@ Dark-Mode-Design-System/
 │   └── script.test.js  # Arquivo de testes unitários para script.js
 ├── docs/               # Documentação adicional e diagramas
 │   ├── architecture.png # Diagrama de arquitetura do sistema
-│   └── hero-image.txt   # Placeholder para imagem hero
+│   └── hero-image.png   # Imagem hero profissional
 ├── config/             # Arquivos de configuração (LICENSE, CONTRIBUTING.md)
 │   ├── LICENSE         # Licença MIT
 │   └── CONTRIBUTING.md # Diretrizes para contribuição
@@ -277,6 +277,7 @@ This diagram illustrates the design system's architecture, showing how component
 
 
 
+
 ## 🖼️ Imagem Hero / Hero Image
 
 Uma representação visual do sistema de design em ação, destacando a estética e funcionalidade do modo escuro.
@@ -288,6 +289,7 @@ A visual representation of the design system in action, highlighting the aesthet
 ![Imagem Hero](docs/hero-image.png)
 
 
+
 ## ✅ Testes Unitários / Unit Tests
 
 Para executar os testes unitários do `script.js`, abra o arquivo `tests/index.html` em seu navegador.
@@ -295,4 +297,5 @@ Para executar os testes unitários do `script.js`, abra o arquivo `tests/index.h
 ---
 
 To run the unit tests for `script.js`, open the `tests/index.html` file in your browser.
+
 
