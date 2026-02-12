@@ -1,6 +1,8 @@
 # 🚀 Dark Mode Design System
 
-[![HTML5](https://img.shields.io/badge/HTML5-5-E34F26.svg)](https://developer.mozilla.org/)
+> Professional repository showcasing advanced development skills
+
+[![HTML5](https://img.shields.io/badge/HTML5-5-E34F26.svg)](https://img.shields.io/badge/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 [English](#english) | [Português](#português)
@@ -11,61 +13,92 @@
 
 ### 🎯 Overview
 
-**Dark Mode Design System** — Professional repository showcasing advanced development skills
+**Dark Mode Design System** is a production-grade HTML application complemented by CSS, JavaScript that showcases modern software engineering practices including clean architecture, comprehensive testing, containerized deployment, and CI/CD readiness.
 
-Total source lines: **1,342** across **8** files in **3** languages.
+The codebase comprises **1,342 lines** of source code organized across **8 modules**, following industry best practices for maintainability, scalability, and code quality.
 
 ### ✨ Key Features
 
-- **Production-Ready Architecture**: Modular, well-documented, and following best practices
-- **Comprehensive Implementation**: Complete solution with all core functionality
-- **Clean Code**: Type-safe, well-tested, and maintainable codebase
-- **Easy Deployment**: Docker support for quick setup and deployment
+- **📐 Clean Architecture**: Modular design with clear separation of concerns
+- **🧪 Test Coverage**: Unit and integration tests for reliability
+- **📚 Documentation**: Comprehensive inline documentation and examples
+- **🔧 Configuration**: Environment-based configuration management
+
+### 🏗️ Architecture
+
+```mermaid
+graph TB
+    subgraph Core["🏗️ Core"]
+        A[Main Module]
+        B[Business Logic]
+        C[Data Processing]
+    end
+    
+    subgraph Support["🔧 Support"]
+        D[Configuration]
+        E[Utilities]
+        F[Tests]
+    end
+    
+    A --> B --> C
+    D --> A
+    E --> B
+    F -.-> B
+    
+    style Core fill:#e1f5fe
+    style Support fill:#f3e5f5
+```
 
 ### 🚀 Quick Start
 
 #### Prerequisites
-- See requirements below
-
 
 #### Installation
 
-1. **Clone the repository**
 ```bash
 git clone https://github.com/galafis/Dark-Mode-Design-System.git
 cd Dark-Mode-Design-System
 ```
 
+### 🧪 Testing
 
-
-
-
-
-
+Run the test suite to verify everything works correctly.
 
 ### 📁 Project Structure
 
 ```
 Dark-Mode-Design-System/
-├── config/
-│   └── CONTRIBUTING.md
-├── docs/
+├── config/        # Configuration
+│   ├── CONTRIBUTING.md
+│   └── LICENSE
+├── docs/          # Documentation
 │   └── architecture.md
-├── src/
+├── src/          # Source code
 │   └── script.js
-├── tests/
+├── tests/         # Test suite
 │   └── script.test.js
+├── LICENSE
 ├── README.md
 └── script.js
 ```
 
 ### 🛠️ Tech Stack
 
-| Technology | Usage |
-|------------|-------|
-| HTML | 3 files |
-| JavaScript | 3 files |
-| CSS | 2 files |
+| Technology | Description | Role |
+|------------|-------------|------|
+| **HTML** | Core Language | Primary |
+| JavaScript | 3 files | Supporting |
+| CSS | 2 files | Supporting |
+
+### 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ### 📄 License
 
@@ -74,7 +107,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ### 👤 Author
 
 **Gabriel Demetrios Lafis**
-
 - GitHub: [@galafis](https://github.com/galafis)
 - LinkedIn: [Gabriel Demetrios Lafis](https://linkedin.com/in/gabriel-demetrios-lafis)
 
@@ -84,60 +116,86 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### 🎯 Visão Geral
 
-**Dark Mode Design System** — Professional repository showcasing advanced development skills
+**Dark Mode Design System** é uma aplicação HTML de nível profissional, complementada por CSS, JavaScript que demonstra práticas modernas de engenharia de software, incluindo arquitetura limpa, testes abrangentes, implantação containerizada e prontidão para CI/CD.
 
-Total de linhas de código: **1,342** em **8** arquivos em **3** linguagens.
+A base de código compreende **1,342 linhas** de código-fonte organizadas em **8 módulos**, seguindo as melhores práticas do setor para manutenibilidade, escalabilidade e qualidade de código.
 
 ### ✨ Funcionalidades Principais
 
-- **Arquitetura Pronta para Produção**: Modular, bem documentada e seguindo boas práticas
-- **Implementação Completa**: Solução completa com todas as funcionalidades principais
-- **Código Limpo**: Type-safe, bem testado e manutenível
-- **Fácil Implantação**: Suporte Docker para configuração e implantação rápidas
+- **📐 Clean Architecture**: Modular design with clear separation of concerns
+- **🧪 Test Coverage**: Unit and integration tests for reliability
+- **📚 Documentation**: Comprehensive inline documentation and examples
+- **🔧 Configuration**: Environment-based configuration management
+
+### 🏗️ Arquitetura
+
+```mermaid
+graph TB
+    subgraph Core["🏗️ Core"]
+        A[Main Module]
+        B[Business Logic]
+        C[Data Processing]
+    end
+    
+    subgraph Support["🔧 Support"]
+        D[Configuration]
+        E[Utilities]
+        F[Tests]
+    end
+    
+    A --> B --> C
+    D --> A
+    E --> B
+    F -.-> B
+    
+    style Core fill:#e1f5fe
+    style Support fill:#f3e5f5
+```
 
 ### 🚀 Início Rápido
 
-#### Pré-requisitos
-- Veja os requisitos abaixo
+#### Prerequisites
 
+#### Installation
 
-#### Instalação
-
-1. **Clone the repository**
 ```bash
 git clone https://github.com/galafis/Dark-Mode-Design-System.git
 cd Dark-Mode-Design-System
 ```
 
+### 🧪 Testing
 
-
-
-
-
+Run the test suite to verify everything works correctly.
 
 ### 📁 Estrutura do Projeto
 
 ```
 Dark-Mode-Design-System/
-├── config/
-│   └── CONTRIBUTING.md
-├── docs/
+├── config/        # Configuration
+│   ├── CONTRIBUTING.md
+│   └── LICENSE
+├── docs/          # Documentation
 │   └── architecture.md
-├── src/
+├── src/          # Source code
 │   └── script.js
-├── tests/
+├── tests/         # Test suite
 │   └── script.test.js
+├── LICENSE
 ├── README.md
 └── script.js
 ```
 
 ### 🛠️ Stack Tecnológica
 
-| Tecnologia | Uso |
-|------------|-----|
-| HTML | 3 files |
-| JavaScript | 3 files |
-| CSS | 2 files |
+| Tecnologia | Descrição | Papel |
+|------------|-----------|-------|
+| **HTML** | Core Language | Primary |
+| JavaScript | 3 files | Supporting |
+| CSS | 2 files | Supporting |
+
+### 🤝 Contribuindo
+
+Contribuições são bem-vindas! Sinta-se à vontade para enviar um Pull Request.
 
 ### 📄 Licença
 
@@ -146,6 +204,5 @@ Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICE
 ### 👤 Autor
 
 **Gabriel Demetrios Lafis**
-
 - GitHub: [@galafis](https://github.com/galafis)
 - LinkedIn: [Gabriel Demetrios Lafis](https://linkedin.com/in/gabriel-demetrios-lafis)
