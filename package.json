@@ -1,0 +1,10 @@
+{
+  "name": "dark-mode-design-system",
+  "version": "1.0.0",
+  "description": "> Professional repository showcasing advanced development skills",
+  "main": "script.js",
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "license": "MIT"
+}
